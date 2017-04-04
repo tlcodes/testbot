@@ -16,7 +16,7 @@ const r = new snoowrap({
   "expires_in": 3600,
   "refreshToken": "3806543-gT3lWoEwmO3mrpv7xX7Ucj8Gwew",
   "scope": "read",
-  "redirect_uri": "http://881d35be.ngrok.io" // to update everytime
+  "redirect_uri": "https://lit-journey-20870.herokuapp.com/" // to update everytime
 });
 
 
@@ -53,6 +53,9 @@ r.getSubreddit('aww').getNew().then(post => {
   }*/
   var i = 2;
   var body = {
+    "event": {
+        "type": "link_shared",
+      }
     //'response_type': "ephemeral",
       // the very newest post in the subreddit
 
