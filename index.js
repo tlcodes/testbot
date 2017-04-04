@@ -41,17 +41,35 @@ app.post('/', function(req, res){
   //var text = req.body.text;
 
 // get the subreddit by name, get the new posts, wait for the data and do...
-r.getSubreddit('aww').getNew().then(address => {
+r.getSubreddit('aww').getNew().then(post => {
+  console.log(post[0]);
+  /*if (post[0].domain === 'imgur.com')
+  {
+    var link = post[0].media.oembed.thumbnail_url;
+  }
+  else if (post[0].domain === 'youtube.com' || post[0].domain === 'youtu.be')
+  {
+    var link = post[0].url;
+  }*/
+  var i = 2;
   var body = {
     //'response_type': "ephemeral",
       // the very newest post in the subreddit
-    'text': address[0].title,
-    "attachments": [
+
+    'text': post[i].url,
+
+    /*'attachments': [
         {
           // ATTENTION, image links from reddit may have no .jpg or extension
           // and Slack only pproves .jpeg, .BMP, .gif and .png. So .gifv won't
           // pass either
-          'image_url': address[0].url
+
+          //'unfurl_links': true
+          'image_url': post[i].url
+          //'image_url': imageLink
+        }],*/
+        'links': [{
+          'url': '<'+post[i].url+'>'
         }]
       }
   console.log(body);
