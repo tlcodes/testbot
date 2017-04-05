@@ -1,0 +1,94 @@
+Homepage
+r.getHot().then(post => { /* do whatever */  });
+r.getNew().then(post => { /* do whatever */  });
+r.getTop().then(post => { /* do whatever */  });
+r.getRising().then(post => { /* do whatever */  });
+r.getControversial().then(post => { /* do whatever */  });
+
+r.getHot().map(post => '<'+post.url+'|'+post.title+'>').then(function(postlist) {
+
+
+Subreddits
+r.getSubreddit('sub').getHot().then(post => { /* do whatever */  });
+r.getSubreddit('sub').getNew().then(post => { /* do whatever */  });
+r.getSubreddit('sub').getTop().then(post => { /* do whatever */  });
+r.getSubreddit('sub').getRising().then(post => { /* do whatever */  });
+r.getSubreddit('sub').getControversial().then(post => { /* do whatever */  });
+
+search
+r.getSubreddit('sub').search({query: 'blah', sort: 'year'}).then(console.log)
+doc here for options
+https://not-an-aardvark.github.io/snoowrap/Subreddit.html#search__anchor
+
+Body message for single/random posts:
+var body = {
+  'response_type': "ephemeral",
+  'username': 'testbot',
+  'as_user': false,
+  'text': '*Reddit Homepage Controversial Posts*',
+  'unfurl_links': true,
+  'attachments': [{
+    'text': '+ ' + postlist.join('\n+ ')
+  }]
+}
+
+Body for posts list
+  var home = {
+    'response_type': "ephemeral",
+    'username': 'testbot',
+    'as_user': false,
+    'text': '*Reddit Homepage Hot Posts*',
+    'unfurl_links': true,
+    'attachments': [{
+      'text': '+ ' + postlist.join('\n+ ')
+    }]
+}
+
+});
+
+Random num for random post:
+var i = Math.floor(Math.random() * 25);
+
++++++++++++++++++++++++++++++++++++
+
+Example for homepage hot post:
+r.getHot().then(post => {
+
+  var i = Math.floor(Math.random() * 25);
+  //console.log(post[i]);
+  var body = {
+    'response_type': "in_channel",
+    'text': '<'+post[i].url+'|'+ post[i].title +'>',
+    'unfurl_links': true,
+    'unfurl_media': true,
+      'attachments': [
+          {
+            'title': 'Random Hot Post From Reddit\'s Home Page',
+            'pretext': 'Posted in ' + post[i].subreddit_name_prefixed + ' by ' + post[i].author.name
+            + '\nFrom ' + post[i].domain,
+            //'title': post[i].title,
+            //'title_link': post[i].url,
+            'footer': '<https://www.reddit.com'+post[i].permalink+'|See on Reddit>',
+            "color": "#439FE0"
+          }],
+      }
+  //console.log(body);
+
+  res.send(body);
+})
+
+
+Example for list Rising posts of a subreddit:
+r.getSubreddit('sub').getRising().then(post => {
+var body = {
+  'response_type': "ephemeral",
+  'username': 'testbot',
+  'as_user': false,
+  'text': '*Reddit Homepage Hot Posts*',
+  'unfurl_links': true,
+  'attachments': [{
+    'text': '+ ' + postlist.join('\n+ ')
+  }]
+}
+res.send(body)
+  });

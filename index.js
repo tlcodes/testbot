@@ -33,55 +33,212 @@ app.get('/', function(req, res){
   res.send('WOOF!');
 });
 
-//get hot posts from the home page
-//r.getHot().map(post => post.title).then(console.log);
-
+// message building function
 app.post('/', function(req, res){
   // get the command text
-  //var text = req.body.text;
+  if (req.body.text === ''){
+    // no text, just the command, send a random post from homepage
+    r.getHot().then(post => {
 
-// get the subreddit by name, get the new posts, wait for the data and do...
-r.getSubreddit('aww').getNew().then(post => {
-  console.log(post[0]);
-  /*if (post[0].domain === 'imgur.com')
-  {
-    var link = post[0].media.oembed.thumbnail_url;
+      var i = Math.floor(Math.random() * 25);
+      //console.log(post[i]);
+      var body = {
+        'response_type': "in_channel",
+        'text': '<'+post[i].url+'|'+ post[i].title +'>',
+        'unfurl_links': true,
+        'unfurl_media': true,
+          'attachments': [
+              {
+                'title': 'Random Hot Post From Reddit\'s Home Page',
+                'pretext': 'Posted in ' + post[i].subreddit_name_prefixed + ' by ' + post[i].author.name
+                + '\nFrom ' + post[i].domain,
+                //'title': post[i].title,
+                //'title_link': post[i].url,
+                'footer': '<https://www.reddit.com'+post[i].permalink+'|See on Reddit>',
+                "color": "#439FE0"
+              }],
+          }
+      //console.log(body);
+
+      res.send(body);
+    })
+  } else {
+    var command = req.body.text.toLowerCase();
+    command = command.split(' ');
+    if (command.length === 1) {
+      switch (command[0]) {
+        case 'hot':
+        r.getHot().map(post => '<'+post.url+'|'+post.title+'>').then(function(postlist) {
+          var home = {
+            'response_type': "ephemeral",
+            'username': 'testbot',
+            'as_user': false,
+            'text': '*Reddit Homepage Hot Posts*',
+            'unfurl_links': true,
+            'attachments': [{
+              'text': '+ ' + postlist.join('\n+ ')
+            }]
+        }
+        res.send(home);
+
+      });
+        break;
+        case 'new': // write get new function
+        r.getNew().map(post => '<'+post.url+'|'+post.title+'>').then(function(postlist) {
+          console.log(postlist)
+          var homeNew = {
+            'response_type': "ephemeral",
+            'username': 'testbot',
+            'as_user': false,
+            'text': '*Reddit Homepage New Posts*',
+            'unfurl_links': true,
+            'attachments': [{
+              'text': '+ ' + postlist.join('\n+ ')
+            }]
+        }
+        res.send(homeNew);
+      });
+        break;
+        case 'top': // write get top function
+        r.getTop().map(post => '<'+post.url+'|'+post.title+'>').then(function(postlist) {
+          console.log(postlist)
+          var homeTop = {
+            'response_type': "ephemeral",
+            'username': 'testbot',
+            'as_user': false,
+            'text': '*Reddit Homepage Top Posts*',
+            'unfurl_links': true,
+            'attachments': [{
+              'text': '+ ' + postlist.join('\n+ ')
+            }]
+        }
+        res.send(homeTop);
+      });
+        break;
+        case 'rising': // write get rising function
+        r.getRising().map(post => '<'+post.url+'|'+post.title+'>').then(function(postlist) {
+          console.log(postlist)
+          var homeRising = {
+            'response_type': "ephemeral",
+            'username': 'testbot',
+            'as_user': false,
+            'text': '*Reddit Homepage Rising Posts*',
+            'unfurl_links': true,
+            'attachments': [{
+              'text': '+ ' + postlist.join('\n+ ')
+            }]
+        }
+        res.send(homeRising);
+      });
+        break;
+        case 'controversial': // write get controversial function
+        r.getControversial().map(post => '<'+post.url+'|'+post.title+'>').then(function(postlist) {
+          console.log(postlist)
+          var homeControversial = {
+            'response_type': "ephemeral",
+            'username': 'testbot',
+            'as_user': false,
+            'text': '*Reddit Homepage Controversial Posts*',
+            'unfurl_links': true,
+            'attachments': [{
+              'text': '+ ' + postlist.join('\n+ ')
+            }]
+        }
+        res.send(homeControversial);
+      });
+        break;
+        case 'help' : // help/usage message
+        var help = {
+          'response_type': 'ephemeral',
+          'text':'*bot usage*',
+          //"username": "testbot",
+          "mrkdwn": true,
+          'attachments': [
+            {
+            "mrkdwn": true,
+            'text': '*/reddit help* _This help message_\n' +
+            '*/reddit* _Random (from latest 25) hot post from Reddit homepage_\n' +
+            '*/reddit subreddit* _Random hot post (from latest 25) in subreddit_\n' +
+            '*/reddit new/rising/controversial/top* _List latest hot/new/rising/controversial/top posts from reddit homepage_\n' +
+            '*/reddit subreddit new/rising/controversial/top* _List latest hot/new/rising/controversial/top posts from subreddit_\n' +
+            '*/reddit [kw]* _Top post from reddit homepage search_\n' +
+            '*/reddit [kw] list* _List of posts from reddit homepage search_\n' +
+            '*/reddit subreddit [kw]* _Top post from subreddit search_\n' +
+            '*/reddit subreddit [kw] list* _List of posts from subreddit search_\n'
+          }]
+        }
+        res.send(help);
+        break;
+        default: // write getSubreddit random hot post
+        r.getSubreddit(command[0]).getHot().then(post => {
+
+          var i = Math.floor(Math.random() * 25);
+          //console.log(post[i]);
+          var body = {
+            'response_type': "ephemeral",
+            'text': '<'+post[i].url+'|'+ post[i].title +'>',
+            'unfurl_links': true,
+            'unfurl_media': true,
+              'attachments': [
+                  {
+                    'pretext': 'Posted in ' + post[i].subreddit_name_prefixed + ' by ' + post[i].author.name
+                    + '\nFrom ' + post[i].domain,
+                    //'title': post[i].title,
+                    //'title_link': post[i].url,
+                    'footer': '<https://www.reddit.com'+post[i].permalink+'|See on Reddit>',
+                    "color": "#439FE0"
+                  }],
+              }
+          //console.log(body);
+          res.send(body);
+      });
+    }
   }
-  else if (post[0].domain === 'youtube.com' || post[0].domain === 'youtu.be')
-  {
-    var link = post[0].url;
-  }*/
-  var i = 2;
-  var body = {
-    "event": {
-        "type": "link_shared",
-      }
-    //'response_type': "ephemeral",
-      // the very newest post in the subreddit
-
-    'text': post[i].url,
-
-    /*'attachments': [
-        {
-          // ATTENTION, image links from reddit may have no .jpg or extension
-          // and Slack only pproves .jpeg, .BMP, .gif and .png. So .gifv won't
-          // pass either
-
-          //'unfurl_links': true
-          'image_url': post[i].url
-          //'image_url': imageLink
-        }],*/
-        'links': [{
-          'url': '<'+post[i].url+'>'
-        }]
-      }
-  console.log(body);
-  res.send(body);
+  }
 });
 
+/*
+    if (!command === ''){
+      text = command.split(' ');
+      // Now if we get more than one words after the command
+      if (command.length > 1) {
+        // make a call for a search in the subreddit, for example
+      }
+      // else, we only got 1 word after the command, that's the subreddit only
+      else if (command.length === 1) {
+        // post a random post from the subreddit
+      }
+    } else {
+      //no arguments get hot posts from the home page
 
+    });
+  } */
+
+/*
+  // get the subreddit by name, get the new posts, wait for the data and do...
+  r.getSubreddit('funny').getHot().then(post => {
+
+    var i = Math.floor(Math.random() * 25);
+    console.log(post[i]);
+    var body = {
+      'response_type': "ephemeral",
+      'text': '<'+post[i].url+'|'+ post[i].title +'>',
+      'unfurl_links': true,
+      'unfurl_media': true,
+        'attachments': [
+            {
+              'pretext': 'Posted in ' + post[i].subreddit_name_prefixed + ' by ' + post[i].author.name
+              + '\nFrom ' + post[i].domain,
+              //'title': post[i].title,
+              //'title_link': post[i].url,
+              'footer': '<https://www.reddit.com'+post[i].permalink+'|See on Reddit>',
+              "color": "#439FE0"
+            }],
+        }
+    console.log(body);
+    res.send(body);
 });
-
+*/
 
 // Listen!
 app.listen(app.get('port'), function() {
