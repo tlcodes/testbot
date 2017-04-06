@@ -17,7 +17,7 @@ r.getSubreddit('sub').getControversial().then(post => { /* do whatever */  });
 
 search
 r.getSubreddit('sub').search({query: 'blah', sort: 'year'}).then(console.log)
-doc here for options
+doc here for more options:
 https://not-an-aardvark.github.io/snoowrap/Subreddit.html#search__anchor
 
 Body message for single/random posts:

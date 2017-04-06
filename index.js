@@ -93,7 +93,7 @@ app.post('/', function(req, res){
             'text': '*Reddit Homepage New Posts*',
             'unfurl_links': true,
             'attachments': [{
-              'text': '+ ' + postlist.join('\n+ ')
+              'text': '+ ' + postlist.join('\n')
             }]
         }
         res.send(homeNew);
@@ -159,8 +159,8 @@ app.post('/', function(req, res){
             'text': '*/reddit help* _This help message_\n' +
             '*/reddit* _Random (from latest 25) hot post from Reddit homepage_\n' +
             '*/reddit subreddit* _Random hot post (from latest 25) in subreddit_\n' +
-            '*/reddit new/rising/controversial/top* _List latest hot/new/rising/controversial/top posts from reddit homepage_\n' +
-            '*/reddit subreddit new/rising/controversial/top* _List latest hot/new/rising/controversial/top posts from subreddit_\n' +
+            '*/reddit-new/rising/controversial/top* _List latest hot/new/rising/controversial/top posts from reddit homepage_\n' +
+            '*/reddit-new/rising/controversial/top subreddit* _List latest hot/new/rising/controversial/top posts from subreddit_\n' +
             '*/reddit [kw]* _Top post from reddit homepage search_\n' +
             '*/reddit [kw] list* _List of posts from reddit homepage search_\n' +
             '*/reddit subreddit [kw]* _Top post from subreddit search_\n' +
@@ -196,49 +196,6 @@ app.post('/', function(req, res){
   }
   }
 });
-
-/*
-    if (!command === ''){
-      text = command.split(' ');
-      // Now if we get more than one words after the command
-      if (command.length > 1) {
-        // make a call for a search in the subreddit, for example
-      }
-      // else, we only got 1 word after the command, that's the subreddit only
-      else if (command.length === 1) {
-        // post a random post from the subreddit
-      }
-    } else {
-      //no arguments get hot posts from the home page
-
-    });
-  } */
-
-/*
-  // get the subreddit by name, get the new posts, wait for the data and do...
-  r.getSubreddit('funny').getHot().then(post => {
-
-    var i = Math.floor(Math.random() * 25);
-    console.log(post[i]);
-    var body = {
-      'response_type': "ephemeral",
-      'text': '<'+post[i].url+'|'+ post[i].title +'>',
-      'unfurl_links': true,
-      'unfurl_media': true,
-        'attachments': [
-            {
-              'pretext': 'Posted in ' + post[i].subreddit_name_prefixed + ' by ' + post[i].author.name
-              + '\nFrom ' + post[i].domain,
-              //'title': post[i].title,
-              //'title_link': post[i].url,
-              'footer': '<https://www.reddit.com'+post[i].permalink+'|See on Reddit>',
-              "color": "#439FE0"
-            }],
-        }
-    console.log(body);
-    res.send(body);
-});
-*/
 
 // Listen!
 app.listen(app.get('port'), function() {

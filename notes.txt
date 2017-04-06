@@ -1,0 +1,7 @@
+Slack doesn't unfurl links that already got posted previously
+Will need to implement the status code response like 404 if sub is not found or command crashes
+We maywant to update the message body object text property for new/top/controversial/rising
+Search can't be empty, if no text after reddit-q or reddit-s-q, send an ephemeral response: "you must enter a search query + usage"
+
+implement list command: reddit-l and reddit-s-l, hot default
+can add new/top/rising/controversial      and    subreddit new/top/rising/controversial
