@@ -27,11 +27,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // set the port to whaever or 9001
 app.set('port', (process.env.PORT || 9001));
 
+// Printing a list of the titles on the front page
+//r.getHot().map(post => post.title).then(console.log);
+
 // The post request, evaluates the user input and returns data
 app.post('/', (req, res) => {
-  //console.log(req.body);
-  let text = req.body.text;
+  // this command should only contain ONE word, so maybe check for spaces
 
+  let text = req.body.text;
   // bot implementation comes here:
   hotPostList(text)
     .then((result) => {
@@ -43,6 +46,98 @@ app.post('/', (req, res) => {
 
 });
 
+/*
+app.post('/list', (req, res) => {
+  // make an array of string from the input text
+  let text = req.body.text.split(' ');
+
+  var sub = '';
+  // if there are 2 words, firt one is the subreddit name
+  if (text.length === 2) {
+    sub = text[0];
+  }
+
+// if the last word is...
+  switch (text[text.length - 1]) {
+    //empty, use the grab posts from home page 'hot' Post List
+    case '': hotPostList('')
+    // map through the post list and grab some properties
+    .then((postlist) => listThat(postlist))
+    .then((list) => {
+      // format that into a nice list
+      let listMessage = buildList(list);
+      return listMessage;
+    })
+    // send it
+    .then(listMessage => res.send(listMessage));
+    break;
+
+    case 'new': newPostList(sub)
+    .then((postlist) => listThat(postlist))
+    .then((list) => {
+      let listMessage = buildList(list);
+      return listMessage;
+    })
+    .then(listMessage => res.send(listMessage));
+    break;
+
+    case 'top': topPostList(sub)
+    .then((postlist) => listThat(postlist))
+    .then((list) => {
+      let listMessage = buildList(list);
+      return listMessage;
+    })
+    .then(listMessage => res.send(listMessage));
+    break;
+
+    case 'rising': risingPostList(sub)
+    .then((postlist) => listThat(postlist))
+    .then((list) => {
+      let listMessage = buildList(list);
+      return listMessage;
+    })
+    .then(listMessage => res.send(listMessage));
+    break;
+
+    case 'controversial': controPostList(sub)
+    .then((postlist) => listThat(postlist))
+    .then((list) => {
+      let listMessage = buildList(list);
+      return listMessage;
+    })
+    .then(listMessage => res.send(listMessage));
+    break;
+
+    case 'hot': hotPostList(sub)
+    .then((postlist) => listThat(postlist))
+    .then((list) => {
+      let listMessage = buildList(list);
+      return listMessage;
+    })
+    .then(listMessage => res.send(listMessage));
+    break;
+    // if hot/new/rising/top/controversial was not used,
+    // then the text is a subreddit only, this is where the app crashes.
+    // in the r.getSubreddit of the hotPostList?!?
+    default: hotPostList(text)
+    //.map(post => '<' + post.url + '|' + post.title + '>\nScore: ' + post.score + ' | Comments: ' + post.num_comments +' | Posted in ' + post.subreddit_name_prefixed+ '\n')
+    .then((postlist) => listThat(postlist))
+    .then((list) => {
+      let listMessage = buildList(list);
+      return listMessage;
+    })
+    .then(listMessage => res.send(listMessage));
+    break;
+  }
+});
+
+function listThat(rdtObject) {
+  console.log(rdtObject);
+  return rdtObject.map(post => '<' + post.url + '|' + post.title + '>\nScore: ' + post.score + ' | Comments: ' + post.num_comments +' | Posted in ' + post.subreddit_name_prefixed+ '\n');
+}
+*/
+
+// example for random 'new' post, can repeat for top/rising/controversial
 app.post('/new', (req, res) => {
   //console.log(req.body);
   let text = req.body.text;
@@ -59,13 +154,9 @@ app.post('/new', (req, res) => {
 });
 
 
-// Printing a list of the titles on the front page
-//r.getHot().map(post => post.title).then(console.log);
-
 // Search command
 app.post('/search', (req, res) => {
   let text = req.body.text;
-// r.getSubreddit('sub').search({query: text, sort: 'year'}).then(console.log)
   searchFor(text)
   .then((list) => {
     let listMessage = buildList(list);
@@ -75,12 +166,11 @@ app.post('/search', (req, res) => {
 
 });
 
-// Search command
+// Search a subreddit
 app.post('/searchsub', (req, res) => {
-  let text = req.body.text.split(' ');
-// add condition check, text can't be empty, send "you must enter a search query + usage"
+  // add condition check here, req.body.text can't be empty, send "you must enter a search query + usage"
 
-// r.getSubreddit('sub').search({query: text, sort: 'year'}).then(console.log)
+  let text = req.body.text.split(' ');
   searchSub(text)
   .then((list) => {
     let listMessage = buildList(list);
@@ -93,7 +183,7 @@ app.post('/searchsub', (req, res) => {
 // search Reddit for the query terms
 function searchFor (theQuery) {
   return r.search({query: theQuery, sort: 'all'})
-  .map(post => '<' + post.url + '|' + post.title + '>\nScore: ' + post.score + ' | Comments: ' + post.num_comments +'\n')
+  .map(post => '<' + post.url + '|' + post.title + '>\nScore: ' + post.score + ' | Comments: ' + post.num_comments +' | Posted in ' + post.subreddit_name_prefixed+ '\n')
   .then(postlist => postlist);
 }
 
@@ -106,58 +196,31 @@ function searchSub (subQuery) {
   .then(postlist => postlist);
 }
 
-// Format list message with these slack properties
-function buildList (searchResults) {
-  let format = {
-    'response_type': "in_channel",
-    'username': 'testbot',
-    'channel': 'directmessage',
-    'as_user': false,
-    'text': '*Here are your results*',
-    'unfurl_links': true,
-    'mrkdwn': true,
-    'attachments': [{
-      'text': ':small_orange_diamond: ' + searchResults.join('\n:small_orange_diamond: '),
-      'footer': 'The Morning Bunch :green_heart:',
-      'color': '#439FE0'
-    }]
-  }
-return format;
-}
 
 // Fetches hot posts from a subreddit
 function hotPostList (name) {
-  console.log(name);
-  name = name.split(' ');
-  return r.getSubreddit(name[0]).getHot()
+  // crashes in list command
+  return r.getSubreddit(name).getHot()
             .then(posts => posts);
   }
 
 function newPostList (name) {
-  console.log(name);
-  name = name.split(' ');
-  return r.getSubreddit(name[0]).getNew()
+  return r.getSubreddit(name).getNew()
             .then(posts => posts);
 }
 
 function risingPostList (name) {
-  console.log(name);
-  name = name.split(' ');
-  return r.getSubreddit(name[0]).getRising()
+  return r.getSubreddit(name).getRising()
             .then(posts => posts);
 }
 
 function controPostList (name) {
-  console.log(name);
-  name = name.split(' ');
-  return r.getSubreddit(name[0]).getControversial()
+  return r.getSubreddit(name).getControversial()
             .then(posts => posts);
 }
 
 function topPostList (name) {
-  console.log(name);
-  name = name.split(' ');
-  return r.getSubreddit(name[0]).getTop()
+  return r.getSubreddit(name).getTop()
             .then(posts => posts);
 }
 
@@ -167,10 +230,9 @@ function chooseThread (threads) {
 }
 
 function buildMessage (post) {
-  //console.log(post);
   let data = {
     'response_type': 'in_channel',
-    'text': '*<'+post.url+'|'+ post.title +'>*',
+    'text': '<'+post.url+'|'+ post.title +'>',
     'unfurl_links': true,
     'unfurl_media': true,
     'attachments': [
@@ -184,8 +246,40 @@ function buildMessage (post) {
       }
     ]
   };
+  if(post.over_18) {
+    // will need to change this again, to update the text
+    data = {
+      'response_type': 'ephemeral';
+      'text': 'Oops, we can\'t show you this content :flushed:',
+      'attachments': [
+        {
+          'text': ':thinking_face: You may want to try again',
+          'footer': 'The Morning Bunch :green_heart:',
+          'color': '#439FE0'
+        }
+      ]
+    }
+  }
   return data;
 }
+
+// Format list message with these slack properties
+function buildList (searchResults) {
+  let format = {
+    'response_type': "ephemeral",
+    'as_user': true,
+    'text': '*Here are your results*',
+    'unfurl_links': true,
+    'mrkdwn': true,
+    'attachments': [{
+      'text': ':small_orange_diamond: ' + searchResults.join('\n:small_orange_diamond: '),
+      'footer': 'The Morning Bunch :green_heart:',
+      'color': '#439FE0'
+    }]
+  }
+return format;
+}
+
 
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
