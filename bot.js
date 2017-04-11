@@ -33,6 +33,85 @@ app.set('port', (process.env.PORT || 9001));
 // The post request, evaluates the user input and returns data
 app.post('/', (req, res) => {
   // this command should only contain ONE word, so maybe check for spaces
+  let text = req.body.text.toLowerCase().split(' ');
+  console.log(text);
+  var sub = '';
+  // if there are 2 words, firt one is the subreddit name
+  if (text.length > 1) {
+    sub = text[0];
+    // otherwise get the text back as a string
+  } else {
+    text = text[0];
+  }
+  // if the last word is...
+  switch (text[text.length - 1]) {
+    //empty, use the grab posts from home page 'hot' Post List
+    case '': hotPostList('')
+    .then((result) => {
+      // map through the result post list and choose a random one
+      let thread = chooseThread(result);
+      // then format a message from reddit object to Slack
+      let message = buildMessage(thread);
+      return message;
+      // send the formatted message
+    }).then(message => res.send(message));
+    break;
+
+    case 'new': newPostList(sub)
+    .then((result) => {
+      let thread = chooseThread(result);
+      let message = buildMessage(thread);
+      return message;
+      }).then(message => res.send(message));
+      break;
+
+    case 'top': topPostList(sub)
+    .then((result) => {
+      let thread = chooseThread(result);
+      let message = buildMessage(thread);
+      return message;
+      }).then(message => res.send(message));
+      break;
+
+    case 'rising': risingPostList(sub)
+    .then((result) => {
+      let thread = chooseThread(result);
+      let message = buildMessage(thread);
+      return message;
+      }).then(message => res.send(message));
+      break;
+
+    case 'controversial': controPostList(sub)
+    .then((result) => {
+      let thread = chooseThread(result);
+      let message = buildMessage(thread);
+      return message;
+      }).then(message => res.send(message));
+      break;
+
+    case 'hot': hotPostList(sub)
+    .then((result) => {
+      let thread = chooseThread(result);
+      let message = buildMessage(thread);
+      return message;
+      }).then(message => res.send(message));
+      break;
+
+    // if hot/new/rising/top/controversial was not used,
+    // then the text is a subreddit only
+    default: hotPostList(text)
+    .then((result) => {
+      let thread = chooseThread(result);
+      let message = buildMessage(thread);
+      return message;
+      }).then(message => res.send(message));
+      break;
+  }
+});
+
+/*
+app.post('/', (req, res) => {
+  // this command should only contain ONE word, so maybe check for spaces
 
   let text = req.body.text;
   // bot implementation comes here:
@@ -45,18 +124,19 @@ app.post('/', (req, res) => {
   }).then(message => res.send(message));
 
 });
+*/
 
-/*
 app.post('/list', (req, res) => {
   // make an array of string from the input text
-  let text = req.body.text.split(' ');
-
+  let text = req.body.text.toLowerCase().split(' ');
   var sub = '';
   // if there are 2 words, firt one is the subreddit name
-  if (text.length === 2) {
+  if (text.length > 1) {
     sub = text[0];
+    // otherwise get the text back as a string
+  } else {
+    text = text[0];
   }
-
 // if the last word is...
   switch (text[text.length - 1]) {
     //empty, use the grab posts from home page 'hot' Post List
@@ -117,30 +197,27 @@ app.post('/list', (req, res) => {
     .then(listMessage => res.send(listMessage));
     break;
     // if hot/new/rising/top/controversial was not used,
-    // then the text is a subreddit only, this is where the app crashes.
-    // in the r.getSubreddit of the hotPostList?!?
+    // then the text is a subreddit only.
     default: hotPostList(text)
-    //.map(post => '<' + post.url + '|' + post.title + '>\nScore: ' + post.score + ' | Comments: ' + post.num_comments +' | Posted in ' + post.subreddit_name_prefixed+ '\n')
     .then((postlist) => listThat(postlist))
     .then((list) => {
       let listMessage = buildList(list);
       return listMessage;
     })
     .then(listMessage => res.send(listMessage));
-    break;
   }
 });
 
 function listThat(rdtObject) {
-  console.log(rdtObject);
+  //console.log(rdtObject);
   return rdtObject.map(post => '<' + post.url + '|' + post.title + '>\nScore: ' + post.score + ' | Comments: ' + post.num_comments +' | Posted in ' + post.subreddit_name_prefixed+ '\n');
 }
-*/
+
 
 // example for random 'new' post, can repeat for top/rising/controversial
 app.post('/new', (req, res) => {
   //console.log(req.body);
-  let text = req.body.text;
+  let text = req.body.text.toLowerCase();
 
   // bot implementation comes here:
   newPostList(text)
@@ -153,6 +230,55 @@ app.post('/new', (req, res) => {
 
 });
 
+// get a post from the 'Rising' tab
+
+app.post('/rising', (req, res) => {
+  //console.log(req.body);
+  let text = req.body.text.toLowerCase();
+
+  // bot implementation comes here:
+  risingPostList(text)
+    .then((result) => {
+      let thread = chooseThread(result);
+      let message = buildMessage(thread);
+      return message;
+
+  }).then(message => res.send(message));
+
+});
+
+// Get post from the 'Top' tab
+app.post('/top', (req, res) => {
+  //console.log(req.body);
+  let text = req.body.text.toLowerCase();
+
+  // bot implementation comes here:
+  topPostList(text)
+    .then((result) => {
+      let thread = chooseThread(result);
+      let message = buildMessage(thread);
+      return message;
+
+  }).then(message => res.send(message));
+
+});
+
+
+// Get post from the Controversial tab
+app.post('/controversial', (req, res) => {
+  //console.log(req.body);
+  let text = req.body.text.toLowerCase();
+
+  // bot implementation comes here:
+  controPostList(text)
+    .then((result) => {
+      let thread = chooseThread(result);
+      let message = buildMessage(thread);
+      return message;
+
+  }).then(message => res.send(message));
+
+});
 
 // Search command
 app.post('/search', (req, res) => {
@@ -171,6 +297,7 @@ app.post('/searchsub', (req, res) => {
   // add condition check here, req.body.text can't be empty, send "you must enter a search query + usage"
 
   let text = req.body.text.split(' ');
+  console.log(text);
   searchSub(text)
   .then((list) => {
     let listMessage = buildList(list);
@@ -191,11 +318,11 @@ function searchFor (theQuery) {
 function searchSub (subQuery) {
   let sub = subQuery.shift();
   subQuery = subQuery.join(' ');
+  console.log(subQuery);
   return r.getSubreddit(sub).search({query: subQuery, sort: 'all'})
   .map(post => '<' + post.url + '|' + post.title + '>\nScore: ' + post.score + ' | Comments: ' + post.num_comments +'\n')
   .then(postlist => postlist);
 }
-
 
 // Fetches hot posts from a subreddit
 function hotPostList (name) {
@@ -229,6 +356,7 @@ function chooseThread (threads) {
   return threads[parseInt(Math.random() * (threads.length))];
 }
 
+// format the message for random posts
 function buildMessage (post) {
   let data = {
     'response_type': 'in_channel',
@@ -249,13 +377,13 @@ function buildMessage (post) {
   if(post.over_18) {
     // will need to change this again, to update the text
     data = {
-      'response_type': 'ephemeral';
+      'response_type': 'ephemeral',
       'text': 'Oops, we can\'t show you this content :flushed:',
       'attachments': [
         {
-          'text': ':thinking_face: You may want to try again',
+          'text': ':thinking_face: You may want to try something else.',
           'footer': 'The Morning Bunch :green_heart:',
-          'color': '#439FE0'
+          'color': 'danger'
         }
       ]
     }
